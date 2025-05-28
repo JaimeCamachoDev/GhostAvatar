@@ -734,7 +734,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord11.xyz = vertexToFrag385;
@@ -962,7 +962,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -1444,7 +1444,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
@@ -1611,7 +1611,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
@@ -1851,7 +1851,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
@@ -2036,7 +2036,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -2279,7 +2279,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
@@ -2446,7 +2446,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
@@ -2672,7 +2672,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord7.xyz = vertexToFrag385;
@@ -2852,7 +2852,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
@@ -3170,7 +3170,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord11.xyz = vertexToFrag385;
@@ -3396,7 +3396,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -3743,7 +3743,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord1.xyz = ase_positionWS;
@@ -3890,7 +3890,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
@@ -4112,7 +4112,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord1.xyz = ase_positionWS;
@@ -4258,7 +4258,7 @@ Shader "Hex_Avatar_Excurio_Lit"
 				ifLocalVar467 = break380.y;
 				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.3 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
 				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
@@ -4319,7 +4319,7 @@ Node;AmplifyShaderEditor.RangedFloatNode;421;-2244.02,1477.23;Inherit;False;Prop
 Node;AmplifyShaderEditor.BreakToComponentsNode;380;-2272,512;Inherit;True;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
 Node;AmplifyShaderEditor.TriplanarNode;302;-1136,-1408;Inherit;True;Spherical;Object;False;Hex Pattern;_HexPattern;white;7;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;468;-2320,864;Inherit;False;Constant;_HorVert;Hor-Vert;10;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.TFHCRemapNode;494;-2464,1312;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;-1.1;False;4;FLOAT;1.1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.TFHCRemapNode;494;-2464,1312;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;-1.1;False;4;FLOAT;1.3;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleAddOpNode;420;-2048,1376;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ConditionalIfNode;467;-2032,864;Inherit;False;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;4;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.DynamicAppendNode;381;-1984,400;Inherit;False;FLOAT2;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT2;0
@@ -4575,4 +4575,4 @@ WireConnection;253;6;487;0
 WireConnection;253;8;296;0
 WireConnection;252;1;490;0
 ASEEND*/
-//CHKSM=889E158026DAE23D74D7C8217BA41BC49F806750
+//CHKSM=5C884ACE1DD44AE023CD3324CE6A12CCEE406723
