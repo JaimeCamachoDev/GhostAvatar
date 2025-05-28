@@ -4,32 +4,18 @@ Shader "HexAvatarAstro"
 {
 	Properties
 	{
-		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
 		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
-		_Transition("Transition", Float) = 1
+		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
+		_Transition("Transition", Range( 0 , 1)) = 0
 		_TransitionOffset("Transition Offset", Float) = 0
 		_MainTex("MainTex", 2D) = "white" {}
 		[HDR]_HexColor("Hex Color", Color) = (1.490777,6.498019,1.134088,0)
 		_Normal("Normal", 2D) = "bump" {}
 		_NormalIntensity("Normal Intensity", Float) = 0
-		_WidthVertex("Width Vertex", Float) = 1
-		_Falloff("Falloff", Float) = 4
-		_WidthAlpha("Width  Alpha", Float) = 1
 		_Contrast("Contrast", Float) = 1
 		_HexPattern("Hex Pattern", 2D) = "white" {}
-		_Tiling("Tiling", Float) = 1
-		_NoiseInfluence1("Noise Influence", Float) = 0
-		_Bias("Bias", Float) = 1
-		_NoiseScale("Noise Scale", Float) = 2
-		_Scale("Scale", Float) = 1
-		_holiiiiiiiiiii("holiiiiiiiiiii", Float) = 20
-		_FresnelScale("Fresnel Scale", Float) = 1
-		_Power("Power", Float) = 2
-		_FresnelPower("Fresnel Power", Float) = 5
-		_HorVert("Hor-Vert", Float) = 0
-		_Metal("Metal", Float) = 0
-		_Smoothness("Smoothness", Float) = 0
-		_AO("AO", Float) = 0.1
+		_Alpha("Alpha", Float) = 1
+		_NoiseDots("NoiseDots", 2D) = "white" {}
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -262,26 +248,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -640,26 +612,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -693,24 +651,9 @@ Shader "HexAvatarAstro"
 			sampler2D _MainTex;
 			sampler2D _Normal;
 			sampler2D _HexPattern;
+			sampler2D _NoiseDots;
 
 
-			half3 HSVToRGB( half3 c )
-			{
-				half4 K = half4( 1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0 );
-				half3 p = abs( frac( c.xxx + K.xyz ) * 6.0 - K.www );
-				return c.z * lerp( K.xxx, saturate( p - K.xxx ), c.y );
-			}
-			
-			half3 RGBToHSV(half3 c)
-			{
-				half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-				half4 p = lerp( half4( c.bg, K.wz ), half4( c.gb, K.xy ), step( c.b, c.g ) );
-				half4 q = lerp( half4( p.xyw, c.r ), half4( c.r, p.yzx ), step( p.x, c.r ) );
-				half d = q.x - min( q.w, q.y );
-				half e = 1.0e-10;
-				return half3( abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-			}
 			inline float4 TriplanarSampling302( sampler2D topTexMap, float3 worldPos, float3 worldNormal, float falloff, float2 tiling, float3 normalScale, float3 index )
 			{
 				float3 projNormal = ( pow( abs( worldNormal ), falloff ) );
@@ -751,6 +694,22 @@ Shader "HexAvatarAstro"
 				return 130.0 * dot( m, g );
 			}
 			
+			half3 HSVToRGB( half3 c )
+			{
+				half4 K = half4( 1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0 );
+				half3 p = abs( frac( c.xxx + K.xyz ) * 6.0 - K.www );
+				return c.z * lerp( K.xxx, saturate( p - K.xxx ), c.y );
+			}
+			
+			half3 RGBToHSV(half3 c)
+			{
+				half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+				half4 p = lerp( half4( c.bg, K.wz ), half4( c.gb, K.xy ), step( c.b, c.g ) );
+				half4 q = lerp( half4( p.xyw, c.r ), half4( c.r, p.yzx ), step( p.x, c.r ) );
+				half d = q.x - min( q.w, q.y );
+				half e = 1.0e-10;
+				return half3( abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+			}
 			float4 CalculateContrast( float contrastValue, float4 colorTarget )
 			{
 				float t = 0.5 * ( 1.0 - contrastValue );
@@ -769,14 +728,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord11.xyz = vertexToFrag385;
 				
@@ -987,58 +946,64 @@ Shader "HexAvatarAstro"
 				float2 uv_Normal = input.ase_texcoord9.xy * _Normal_ST.xy + _Normal_ST.zw;
 				half3 Normal476 = ( _NormalIntensity * UnpackNormalScale( tex2D( _Normal, uv_Normal ), 1.0f ) );
 				
-				half3 hsvTorgb442 = RGBToHSV( _HexColor.rgb );
-				half3 hsvTorgb447 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,hsvTorgb442.z) );
-				half2 temp_cast_2 = (_Tiling).xx;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord10.xyz, input.ase_normal, _Falloff, temp_cast_2, 1.0, 0 );
-				half hex_offset304 = (0.0 + (triplanar302.y - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
-				half temp_output_370_0 = ( hex_offset304 * -0.85 );
+				half2 temp_cast_1 = (3.0).xx;
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord10.xyz, input.ase_normal, 4.0, temp_cast_1, 1.0, 0 );
+				half hex305 = triplanar302.x;
 				float3 ase_objectPosition = GetAbsolutePositionWS( UNITY_MATRIX_M._m03_m13_m23 );
 				half3 vertexToFrag385 = input.ase_texcoord11.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
-				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
-				half clip_1383 = saturate( smoothstepResult374 );
-				half hex305 = triplanar302.r;
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
+				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
+				half temp_output_370_0 = ( hex_offset304 * -0.85 );
 				half smoothstepResult431 = smoothstep( -1.0 , 0.0 , ( temp_output_379_0 + temp_output_370_0 ));
 				half clip_2433 = saturate( smoothstepResult431 );
 				half temp_output_459_0 = ( saturate( (0.0 + (( 1.0 - hex305 ) - 0.95) * (1.0 - 0.0) / (1.0 - 0.95)) ) * ( 1.0 - clip_2433 ) );
+				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
+				half clip_1383 = saturate( smoothstepResult374 );
+				half3 hsvTorgb442 = RGBToHSV( _HexColor.rgb );
+				half3 hsvTorgb447 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,hsvTorgb442.z) );
 				half3 hsvTorgb465 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,10.0) );
-				half fresnelNdotV439 = dot( WorldNormal, WorldViewDirection );
-				half fresnelNode439 = ( 0.0 + _FresnelScale * pow( 1.0 - fresnelNdotV439, _FresnelPower ) );
 				half3 hsvTorgb445 = HSVToRGB( half3(hsvTorgb442.x,1.0,1.0) );
-				half3 fresnel443 = ( fresnelNode439 * hsvTorgb445 * clip_2433 );
-				half3 clampResult452 = clamp( ( ( hsvTorgb447 * clip_1383 * temp_output_459_0 ) + ( clip_2433 * hsvTorgb465 * temp_output_459_0 ) + fresnel443 ) , float3( 0,0,0 ) , half4(999,999,999,999).xyz );
+				half fresnelNdotV439 = dot( WorldNormal, WorldViewDirection );
+				half fresnelNode439 = ( 0.0 + 1.0 * pow( 1.0 - fresnelNdotV439, 1.0 ) );
+				half3 fresnel443 = ( clip_2433 * hsvTorgb445 * fresnelNode439 );
+				half3 clampResult452 = clamp( ( ( temp_output_459_0 * clip_1383 * hsvTorgb447 ) + ( clip_2433 * temp_output_459_0 * hsvTorgb465 ) + fresnel443 ) , float3( 0,0,0 ) , half4(999,999,999,999).xyz );
 				half3 final_emission461 = clampResult452;
 				half fresnelNdotV481 = dot( WorldNormal, WorldViewDirection );
-				half fresnelNode481 = ( _Bias + _Scale * pow( 1.0 - fresnelNdotV481, _Power ) );
+				half fresnelNode481 = ( 0.0 + 1.0 * pow( 1.0 - fresnelNdotV481, 2.0 ) );
+				float2 uv_NoiseDots = input.ase_texcoord9.xy * _NoiseDots_ST.xy + _NoiseDots_ST.zw;
+				half3 temp_output_12_0_g1 = Normal476;
+				half dotResult28_g1 = dot( half3(0.2126729,0.7151522,0.072175) , temp_output_12_0_g1 );
+				half3 temp_cast_6 = (dotResult28_g1).xxx;
+				half temp_output_21_0_g1 = 0.0;
+				half3 lerpResult31_g1 = lerp( temp_cast_6 , temp_output_12_0_g1 , temp_output_21_0_g1);
 				
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
 				half4 break401 = lerpResult405;
 				half total_hex409 = ( saturate( (break401.z + (hex305 - break401.x) * (break401.w - break401.z) / (break401.y - break401.x)) ) * ( 1.0 - clip_1383 ) );
 				half lerpResult387 = lerp( 1.0 , total_hex409 , sign( clip_1383 ));
-				half4 temp_cast_6 = (saturate( lerpResult387 )).xxxx;
+				half4 temp_cast_9 = (saturate( lerpResult387 )).xxxx;
 				
 
 				float3 BaseColor = tex2DNode424.rgb;
 				float3 Normal = Normal476;
-				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) ).rgb;
+				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) * half4( tex2D( _NoiseDots, uv_NoiseDots ).rgb , 0.0 ) * half4( lerpResult31_g1 , 0.0 ) ).rgb;
 				float3 Specular = 0.5;
-				float Metallic = _Metal;
-				float Smoothness = _Smoothness;
-				float Occlusion = _AO;
-				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_6) ).r;
+				float Metallic = 0.0;
+				float Smoothness = 0.0;
+				float Occlusion = 0.1;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_9) ).r;
 				float AlphaClipThreshold = 0.5;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
@@ -1375,26 +1340,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1487,14 +1438,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
 				output.ase_texcoord4.xyz = ase_normalWS;
@@ -1641,9 +1592,9 @@ Shader "HexAvatarAstro"
 
 				float2 uv_MainTex = input.ase_texcoord3.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
-				half2 temp_cast_0 = (_Tiling).xx;
+				half2 temp_cast_0 = (3.0).xx;
 				half3 ase_normalWS = input.ase_texcoord4.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord5.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord5.xyz, input.ase_normal, 4.0, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -1651,17 +1602,17 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = input.ase_texcoord6.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
@@ -1671,7 +1622,7 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_1 = (saturate( lerpResult387 )).xxxx;
 				
 
-				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_1) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -1778,26 +1729,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1830,24 +1767,10 @@ Shader "HexAvatarAstro"
 
 			sampler2D _MainTex;
 			sampler2D _HexPattern;
+			sampler2D _NoiseDots;
+			sampler2D _Normal;
 
 
-			half3 HSVToRGB( half3 c )
-			{
-				half4 K = half4( 1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0 );
-				half3 p = abs( frac( c.xxx + K.xyz ) * 6.0 - K.www );
-				return c.z * lerp( K.xxx, saturate( p - K.xxx ), c.y );
-			}
-			
-			half3 RGBToHSV(half3 c)
-			{
-				half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-				half4 p = lerp( half4( c.bg, K.wz ), half4( c.gb, K.xy ), step( c.b, c.g ) );
-				half4 q = lerp( half4( p.xyw, c.r ), half4( c.r, p.yzx ), step( p.x, c.r ) );
-				half d = q.x - min( q.w, q.y );
-				half e = 1.0e-10;
-				return half3( abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-			}
 			inline float4 TriplanarSampling302( sampler2D topTexMap, float3 worldPos, float3 worldNormal, float falloff, float2 tiling, float3 normalScale, float3 index )
 			{
 				float3 projNormal = ( pow( abs( worldNormal ), falloff ) );
@@ -1888,6 +1811,22 @@ Shader "HexAvatarAstro"
 				return 130.0 * dot( m, g );
 			}
 			
+			half3 HSVToRGB( half3 c )
+			{
+				half4 K = half4( 1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0 );
+				half3 p = abs( frac( c.xxx + K.xyz ) * 6.0 - K.www );
+				return c.z * lerp( K.xxx, saturate( p - K.xxx ), c.y );
+			}
+			
+			half3 RGBToHSV(half3 c)
+			{
+				half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+				half4 p = lerp( half4( c.bg, K.wz ), half4( c.gb, K.xy ), step( c.b, c.g ) );
+				half4 q = lerp( half4( p.xyw, c.r ), half4( c.r, p.yzx ), step( p.x, c.r ) );
+				half d = q.x - min( q.w, q.y );
+				half e = 1.0e-10;
+				return half3( abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+			}
 			float4 CalculateContrast( float contrastValue, float4 colorTarget )
 			{
 				float t = 0.5 * ( 1.0 - contrastValue );
@@ -1906,14 +1845,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
 				output.ase_texcoord5.xyz = ase_normalWS;
@@ -2080,56 +2019,64 @@ Shader "HexAvatarAstro"
 				float2 uv_MainTex = input.ase_texcoord4.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				
-				half3 hsvTorgb442 = RGBToHSV( _HexColor.rgb );
-				half3 hsvTorgb447 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,hsvTorgb442.z) );
-				half2 temp_cast_2 = (_Tiling).xx;
+				half2 temp_cast_1 = (3.0).xx;
 				half3 ase_normalWS = input.ase_texcoord5.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord6.xyz, input.ase_normal, _Falloff, temp_cast_2, 1.0, 0 );
-				half hex_offset304 = (0.0 + (triplanar302.y - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
-				half temp_output_370_0 = ( hex_offset304 * -0.85 );
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord6.xyz, input.ase_normal, 4.0, temp_cast_1, 1.0, 0 );
+				half hex305 = triplanar302.x;
 				float3 ase_objectPosition = GetAbsolutePositionWS( UNITY_MATRIX_M._m03_m13_m23 );
 				half3 vertexToFrag385 = input.ase_texcoord7.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
-				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
-				half clip_1383 = saturate( smoothstepResult374 );
-				half hex305 = triplanar302.r;
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
+				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
+				half temp_output_370_0 = ( hex_offset304 * -0.85 );
 				half smoothstepResult431 = smoothstep( -1.0 , 0.0 , ( temp_output_379_0 + temp_output_370_0 ));
 				half clip_2433 = saturate( smoothstepResult431 );
 				half temp_output_459_0 = ( saturate( (0.0 + (( 1.0 - hex305 ) - 0.95) * (1.0 - 0.0) / (1.0 - 0.95)) ) * ( 1.0 - clip_2433 ) );
+				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
+				half clip_1383 = saturate( smoothstepResult374 );
+				half3 hsvTorgb442 = RGBToHSV( _HexColor.rgb );
+				half3 hsvTorgb447 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,hsvTorgb442.z) );
 				half3 hsvTorgb465 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,10.0) );
+				half3 hsvTorgb445 = HSVToRGB( half3(hsvTorgb442.x,1.0,1.0) );
 				half3 ase_viewVectorWS = ( _WorldSpaceCameraPos.xyz - WorldPosition );
 				half3 ase_viewDirWS = normalize( ase_viewVectorWS );
 				half fresnelNdotV439 = dot( ase_normalWS, ase_viewDirWS );
-				half fresnelNode439 = ( 0.0 + _FresnelScale * pow( 1.0 - fresnelNdotV439, _FresnelPower ) );
-				half3 hsvTorgb445 = HSVToRGB( half3(hsvTorgb442.x,1.0,1.0) );
-				half3 fresnel443 = ( fresnelNode439 * hsvTorgb445 * clip_2433 );
-				half3 clampResult452 = clamp( ( ( hsvTorgb447 * clip_1383 * temp_output_459_0 ) + ( clip_2433 * hsvTorgb465 * temp_output_459_0 ) + fresnel443 ) , float3( 0,0,0 ) , half4(999,999,999,999).xyz );
+				half fresnelNode439 = ( 0.0 + 1.0 * pow( 1.0 - fresnelNdotV439, 1.0 ) );
+				half3 fresnel443 = ( clip_2433 * hsvTorgb445 * fresnelNode439 );
+				half3 clampResult452 = clamp( ( ( temp_output_459_0 * clip_1383 * hsvTorgb447 ) + ( clip_2433 * temp_output_459_0 * hsvTorgb465 ) + fresnel443 ) , float3( 0,0,0 ) , half4(999,999,999,999).xyz );
 				half3 final_emission461 = clampResult452;
 				half fresnelNdotV481 = dot( ase_normalWS, ase_viewDirWS );
-				half fresnelNode481 = ( _Bias + _Scale * pow( 1.0 - fresnelNdotV481, _Power ) );
+				half fresnelNode481 = ( 0.0 + 1.0 * pow( 1.0 - fresnelNdotV481, 2.0 ) );
+				float2 uv_NoiseDots = input.ase_texcoord4.xy * _NoiseDots_ST.xy + _NoiseDots_ST.zw;
+				float2 uv_Normal = input.ase_texcoord4.xy * _Normal_ST.xy + _Normal_ST.zw;
+				half3 Normal476 = ( _NormalIntensity * UnpackNormalScale( tex2D( _Normal, uv_Normal ), 1.0f ) );
+				half3 temp_output_12_0_g1 = Normal476;
+				half dotResult28_g1 = dot( half3(0.2126729,0.7151522,0.072175) , temp_output_12_0_g1 );
+				half3 temp_cast_6 = (dotResult28_g1).xxx;
+				half temp_output_21_0_g1 = 0.0;
+				half3 lerpResult31_g1 = lerp( temp_cast_6 , temp_output_12_0_g1 , temp_output_21_0_g1);
 				
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
 				half4 break401 = lerpResult405;
 				half total_hex409 = ( saturate( (break401.z + (hex305 - break401.x) * (break401.w - break401.z) / (break401.y - break401.x)) ) * ( 1.0 - clip_1383 ) );
 				half lerpResult387 = lerp( 1.0 , total_hex409 , sign( clip_1383 ));
-				half4 temp_cast_6 = (saturate( lerpResult387 )).xxxx;
+				half4 temp_cast_9 = (saturate( lerpResult387 )).xxxx;
 				
 
 				float3 BaseColor = tex2DNode424.rgb;
-				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) ).rgb;
-				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_6) ).r;
+				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) * half4( tex2D( _NoiseDots, uv_NoiseDots ).rgb , 0.0 ) * half4( lerpResult31_g1 , 0.0 ) ).rgb;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_9) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				#ifdef _ALPHATEST_ON
@@ -2228,26 +2175,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2340,14 +2273,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
 				output.ase_texcoord3.xyz = ase_normalWS;
@@ -2494,9 +2427,9 @@ Shader "HexAvatarAstro"
 				float2 uv_MainTex = input.ase_texcoord2.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				
-				half2 temp_cast_1 = (_Tiling).xx;
+				half2 temp_cast_1 = (3.0).xx;
 				half3 ase_normalWS = input.ase_texcoord3.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord4.xyz, input.ase_normal, _Falloff, temp_cast_1, 1.0, 0 );
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord4.xyz, input.ase_normal, 4.0, temp_cast_1, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -2504,17 +2437,17 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = input.ase_texcoord5.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
@@ -2525,7 +2458,7 @@ Shader "HexAvatarAstro"
 				
 
 				float3 BaseColor = tex2DNode424.rgb;
-				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_2) ).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_2) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				half4 color = half4(BaseColor, Alpha );
@@ -2634,26 +2567,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2747,14 +2666,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord7.xyz = vertexToFrag385;
 				
@@ -2915,8 +2834,8 @@ Shader "HexAvatarAstro"
 				
 				float2 uv_MainTex = input.ase_texcoord5.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
-				half2 temp_cast_0 = (_Tiling).xx;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord6.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
+				half2 temp_cast_0 = (3.0).xx;
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord6.xyz, input.ase_normal, 4.0, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -2924,17 +2843,17 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = input.ase_texcoord7.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
@@ -2945,7 +2864,7 @@ Shader "HexAvatarAstro"
 				
 
 				float3 Normal = Normal476;
-				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_1) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -3127,26 +3046,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3180,26 +3085,11 @@ Shader "HexAvatarAstro"
 			sampler2D _MainTex;
 			sampler2D _Normal;
 			sampler2D _HexPattern;
+			sampler2D _NoiseDots;
 
 
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 
-			half3 HSVToRGB( half3 c )
-			{
-				half4 K = half4( 1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0 );
-				half3 p = abs( frac( c.xxx + K.xyz ) * 6.0 - K.www );
-				return c.z * lerp( K.xxx, saturate( p - K.xxx ), c.y );
-			}
-			
-			half3 RGBToHSV(half3 c)
-			{
-				half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-				half4 p = lerp( half4( c.bg, K.wz ), half4( c.gb, K.xy ), step( c.b, c.g ) );
-				half4 q = lerp( half4( p.xyw, c.r ), half4( c.r, p.yzx ), step( p.x, c.r ) );
-				half d = q.x - min( q.w, q.y );
-				half e = 1.0e-10;
-				return half3( abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-			}
 			inline float4 TriplanarSampling302( sampler2D topTexMap, float3 worldPos, float3 worldNormal, float falloff, float2 tiling, float3 normalScale, float3 index )
 			{
 				float3 projNormal = ( pow( abs( worldNormal ), falloff ) );
@@ -3240,6 +3130,22 @@ Shader "HexAvatarAstro"
 				return 130.0 * dot( m, g );
 			}
 			
+			half3 HSVToRGB( half3 c )
+			{
+				half4 K = half4( 1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0 );
+				half3 p = abs( frac( c.xxx + K.xyz ) * 6.0 - K.www );
+				return c.z * lerp( K.xxx, saturate( p - K.xxx ), c.y );
+			}
+			
+			half3 RGBToHSV(half3 c)
+			{
+				half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+				half4 p = lerp( half4( c.bg, K.wz ), half4( c.gb, K.xy ), step( c.b, c.g ) );
+				half4 q = lerp( half4( p.xyw, c.r ), half4( c.r, p.yzx ), step( p.x, c.r ) );
+				half d = q.x - min( q.w, q.y );
+				half e = 1.0e-10;
+				return half3( abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+			}
 			float4 CalculateContrast( float contrastValue, float4 colorTarget )
 			{
 				float t = 0.5 * ( 1.0 - contrastValue );
@@ -3258,14 +3164,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord11.xyz = vertexToFrag385;
 				
@@ -3474,58 +3380,64 @@ Shader "HexAvatarAstro"
 				float2 uv_Normal = input.ase_texcoord9.xy * _Normal_ST.xy + _Normal_ST.zw;
 				half3 Normal476 = ( _NormalIntensity * UnpackNormalScale( tex2D( _Normal, uv_Normal ), 1.0f ) );
 				
-				half3 hsvTorgb442 = RGBToHSV( _HexColor.rgb );
-				half3 hsvTorgb447 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,hsvTorgb442.z) );
-				half2 temp_cast_2 = (_Tiling).xx;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord10.xyz, input.ase_normal, _Falloff, temp_cast_2, 1.0, 0 );
-				half hex_offset304 = (0.0 + (triplanar302.y - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
-				half temp_output_370_0 = ( hex_offset304 * -0.85 );
+				half2 temp_cast_1 = (3.0).xx;
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord10.xyz, input.ase_normal, 4.0, temp_cast_1, 1.0, 0 );
+				half hex305 = triplanar302.x;
 				float3 ase_objectPosition = GetAbsolutePositionWS( UNITY_MATRIX_M._m03_m13_m23 );
 				half3 vertexToFrag385 = input.ase_texcoord11.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
-				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
-				half clip_1383 = saturate( smoothstepResult374 );
-				half hex305 = triplanar302.r;
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
+				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
+				half temp_output_370_0 = ( hex_offset304 * -0.85 );
 				half smoothstepResult431 = smoothstep( -1.0 , 0.0 , ( temp_output_379_0 + temp_output_370_0 ));
 				half clip_2433 = saturate( smoothstepResult431 );
 				half temp_output_459_0 = ( saturate( (0.0 + (( 1.0 - hex305 ) - 0.95) * (1.0 - 0.0) / (1.0 - 0.95)) ) * ( 1.0 - clip_2433 ) );
+				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
+				half clip_1383 = saturate( smoothstepResult374 );
+				half3 hsvTorgb442 = RGBToHSV( _HexColor.rgb );
+				half3 hsvTorgb447 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,hsvTorgb442.z) );
 				half3 hsvTorgb465 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,10.0) );
-				half fresnelNdotV439 = dot( WorldNormal, WorldViewDirection );
-				half fresnelNode439 = ( 0.0 + _FresnelScale * pow( 1.0 - fresnelNdotV439, _FresnelPower ) );
 				half3 hsvTorgb445 = HSVToRGB( half3(hsvTorgb442.x,1.0,1.0) );
-				half3 fresnel443 = ( fresnelNode439 * hsvTorgb445 * clip_2433 );
-				half3 clampResult452 = clamp( ( ( hsvTorgb447 * clip_1383 * temp_output_459_0 ) + ( clip_2433 * hsvTorgb465 * temp_output_459_0 ) + fresnel443 ) , float3( 0,0,0 ) , half4(999,999,999,999).xyz );
+				half fresnelNdotV439 = dot( WorldNormal, WorldViewDirection );
+				half fresnelNode439 = ( 0.0 + 1.0 * pow( 1.0 - fresnelNdotV439, 1.0 ) );
+				half3 fresnel443 = ( clip_2433 * hsvTorgb445 * fresnelNode439 );
+				half3 clampResult452 = clamp( ( ( temp_output_459_0 * clip_1383 * hsvTorgb447 ) + ( clip_2433 * temp_output_459_0 * hsvTorgb465 ) + fresnel443 ) , float3( 0,0,0 ) , half4(999,999,999,999).xyz );
 				half3 final_emission461 = clampResult452;
 				half fresnelNdotV481 = dot( WorldNormal, WorldViewDirection );
-				half fresnelNode481 = ( _Bias + _Scale * pow( 1.0 - fresnelNdotV481, _Power ) );
+				half fresnelNode481 = ( 0.0 + 1.0 * pow( 1.0 - fresnelNdotV481, 2.0 ) );
+				float2 uv_NoiseDots = input.ase_texcoord9.xy * _NoiseDots_ST.xy + _NoiseDots_ST.zw;
+				half3 temp_output_12_0_g1 = Normal476;
+				half dotResult28_g1 = dot( half3(0.2126729,0.7151522,0.072175) , temp_output_12_0_g1 );
+				half3 temp_cast_6 = (dotResult28_g1).xxx;
+				half temp_output_21_0_g1 = 0.0;
+				half3 lerpResult31_g1 = lerp( temp_cast_6 , temp_output_12_0_g1 , temp_output_21_0_g1);
 				
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
 				half4 break401 = lerpResult405;
 				half total_hex409 = ( saturate( (break401.z + (hex305 - break401.x) * (break401.w - break401.z) / (break401.y - break401.x)) ) * ( 1.0 - clip_1383 ) );
 				half lerpResult387 = lerp( 1.0 , total_hex409 , sign( clip_1383 ));
-				half4 temp_cast_6 = (saturate( lerpResult387 )).xxxx;
+				half4 temp_cast_9 = (saturate( lerpResult387 )).xxxx;
 				
 
 				float3 BaseColor = tex2DNode424.rgb;
 				float3 Normal = Normal476;
-				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) ).rgb;
+				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) * half4( tex2D( _NoiseDots, uv_NoiseDots ).rgb , 0.0 ) * half4( lerpResult31_g1 , 0.0 ) ).rgb;
 				float3 Specular = 0.5;
-				float Metallic = _Metal;
-				float Smoothness = _Smoothness;
-				float Occlusion = _AO;
-				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_6) ).r;
+				float Metallic = 0.0;
+				float Smoothness = 0.0;
+				float Occlusion = 0.1;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_9) ).r;
 				float AlphaClipThreshold = 0.5;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
@@ -3719,26 +3631,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3839,14 +3737,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord1.xyz = ase_positionWS;
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
@@ -3972,10 +3870,10 @@ Shader "HexAvatarAstro"
 
 				float2 uv_MainTex = input.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
-				half2 temp_cast_0 = (_Tiling).xx;
+				half2 temp_cast_0 = (3.0).xx;
 				float3 ase_positionWS = input.ase_texcoord1.xyz;
 				half3 ase_normalWS = input.ase_texcoord2.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord3.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord3.xyz, input.ase_normal, 4.0, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -3983,17 +3881,17 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = input.ase_texcoord4.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
@@ -4003,7 +3901,7 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_1 = (saturate( lerpResult387 )).xxxx;
 				
 
-				surfaceDescription.Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
+				surfaceDescription.Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_1) ).r;
 				surfaceDescription.AlphaClipThreshold = 0.5;
 
 				#if _ALPHATEST_ON
@@ -4102,26 +4000,12 @@ Shader "HexAvatarAstro"
 			half4 _MainTex_ST;
 			half4 _Normal_ST;
 			half4 _HexColor;
-			half _HorVert;
-			half _Smoothness;
-			half _Metal;
-			half _Power;
-			half _Scale;
-			half _Bias;
-			half _FresnelPower;
-			half _FresnelScale;
-			half _WidthAlpha;
-			half _NoiseScale;
-			half _AO;
-			half _Falloff;
-			half _Tiling;
-			half _NormalIntensity;
-			half _Contrast;
-			half _WidthVertex;
-			half _TransitionOffset;
+			half4 _NoiseDots_ST;
 			half _Transition;
-			half _NoiseInfluence1;
-			half _holiiiiiiiiiii;
+			half _TransitionOffset;
+			half _Contrast;
+			half _NormalIntensity;
+			half _Alpha;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -4222,14 +4106,14 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = ase_positionWS;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_281_0 = ( temp_output_280_0 * 4.0 );
 				
 				output.ase_texcoord1.xyz = ase_positionWS;
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
@@ -4354,10 +4238,10 @@ Shader "HexAvatarAstro"
 
 				float2 uv_MainTex = input.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
-				half2 temp_cast_0 = (_Tiling).xx;
+				half2 temp_cast_0 = (3.0).xx;
 				float3 ase_positionWS = input.ase_texcoord1.xyz;
 				half3 ase_normalWS = input.ase_texcoord2.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord3.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord3.xyz, input.ase_normal, 4.0, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
@@ -4365,17 +4249,17 @@ Shader "HexAvatarAstro"
 				half3 vertexToFrag385 = input.ase_texcoord4.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
-				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
+				half simplePerlin2D384 = snoise( appendResult381*1.0 );
 				simplePerlin2D384 = simplePerlin2D384*0.5 + 0.5;
 				half ifLocalVar467 = 0;
-				if( _HorVert > 0.0 )
+				if( 0.0 > 0.0 )
 				ifLocalVar467 = break380.x;
-				else if( _HorVert == 0.0 )
+				else if( 0.0 == 0.0 )
 				ifLocalVar467 = break380.y;
-				else if( _HorVert < 0.0 )
+				else if( 0.0 < 0.0 )
 				ifLocalVar467 = break380.z;
-				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
-				half temp_output_379_0 = ( ( simplePerlin2D384 * _NoiseInfluence1 ) + ( _WidthAlpha * temp_output_280_0 ) );
+				half temp_output_280_0 = ( ifLocalVar467 - ( (-1.1 + (_Transition - 0.0) * (1.1 - -1.1) / (1.0 - 0.0)) + _TransitionOffset ) );
+				half temp_output_379_0 = ( ( simplePerlin2D384 * 1.0 ) + ( 4.0 * temp_output_280_0 ) );
 				half smoothstepResult374 = smoothstep( -0.1 , 1.0 , ( temp_output_370_0 + temp_output_379_0 ));
 				half clip_1383 = saturate( smoothstepResult374 );
 				half4 lerpResult405 = lerp( half4(0,1,0,1) , half4(0.5,1,0,1) , clip_1383);
@@ -4385,7 +4269,7 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_1 = (saturate( lerpResult387 )).xxxx;
 				
 
-				surfaceDescription.Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
+				surfaceDescription.Alpha = ( tex2DNode424 * CalculateContrast(_Alpha,temp_cast_1) ).r;
 				surfaceDescription.AlphaClipThreshold = 0.5;
 
 				#if _ALPHATEST_ON
@@ -4425,27 +4309,28 @@ Node;AmplifyShaderEditor.WorldPosInputsNode;369;-2928,576;Inherit;False;0;4;FLOA
 Node;AmplifyShaderEditor.VertexToFragmentNode;385;-2736,576;Inherit;True;False;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.ObjectPositionNode;411;-2720,400;Inherit;False;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 Node;AmplifyShaderEditor.CommentaryNode;298;-1424,-1488;Inherit;False;1129.219;426.5991;Hex Main;7;304;305;303;302;301;300;299;;1,1,1,1;0;0
-Node;AmplifyShaderEditor.CommentaryNode;306;-2289.933,1120;Inherit;False;2164.665;581.4172;Vertex Move;15;296;295;297;287;288;284;283;281;282;280;420;421;289;418;419;;1,1,1,1;0;0
+Node;AmplifyShaderEditor.CommentaryNode;306;-2289.933,1120;Inherit;False;2164.665;581.4172;Vertex Move;14;296;295;297;287;288;284;283;281;282;280;420;421;418;419;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.SimpleSubtractOpNode;410;-2512,512;Inherit;True;2;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.PosVertexDataNode;299;-1360,-1440;Inherit;False;0;0;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;301;-1328,-1216;Inherit;False;Property;_Falloff;Falloff;7;0;Create;True;0;0;0;False;0;False;4;4;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;300;-1328,-1296;Inherit;False;Property;_Tiling;Tiling;11;0;Create;True;0;0;0;False;0;False;1;1.33;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;301;-1328,-1216;Inherit;False;Constant;_Falloff;Falloff;7;0;Create;True;0;0;0;False;0;False;4;4;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;300;-1328,-1296;Inherit;False;Constant;_Tiling;Tiling;10;0;Create;True;0;0;0;False;0;False;3;1.33;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;289;-2736,1312;Inherit;False;Property;_Transition;Transition;0;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;421;-2244.02,1477.23;Inherit;False;Property;_TransitionOffset;Transition Offset;1;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.BreakToComponentsNode;380;-2272,512;Inherit;True;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
-Node;AmplifyShaderEditor.RangedFloatNode;289;-2240,1360;Inherit;False;Property;_Transition;Transition;0;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;468;-2320,864;Inherit;False;Property;_HorVert;Hor-Vert;20;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.TriplanarNode;302;-1136,-1408;Inherit;True;Spherical;Object;False;Hex Pattern;_HexPattern;white;10;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.TriplanarNode;302;-1136,-1408;Inherit;True;Spherical;Object;False;Hex Pattern;_HexPattern;white;7;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;468;-2320,864;Inherit;False;Constant;_HorVert;Hor-Vert;10;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.TFHCRemapNode;494;-2464,1312;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;-1.1;False;4;FLOAT;1.1;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleAddOpNode;420;-2048,1376;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ConditionalIfNode;467;-2032,864;Inherit;False;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;4;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.DynamicAppendNode;381;-1984,400;Inherit;False;FLOAT2;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.RangedFloatNode;365;-2000,528;Inherit;False;Property;_NoiseScale;Noise Scale;14;0;Create;True;0;0;0;False;0;False;2;3;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;365;-2000,528;Inherit;False;Constant;_NoiseScale;Noise Scale;9;0;Create;True;0;0;0;False;0;False;1;3;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.TFHCRemapNode;303;-736,-1280;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;-1;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleSubtractOpNode;280;-1840,1248;Inherit;False;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.CommentaryNode;435;-1760,-640;Inherit;False;1364.214;754.95;Comment;6;364;427;382;376;370;379;;1,1,1,1;0;0
-Node;AmplifyShaderEditor.RangedFloatNode;378;-1792,720;Inherit;False;Property;_NoiseInfluence1;Noise Influence;12;0;Create;True;0;0;0;False;0;False;0;0.24;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.NoiseGeneratorNode;384;-1792,480;Inherit;True;Simplex2D;True;False;2;0;FLOAT2;0,0;False;1;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;419;-1856,1168;Inherit;False;Property;_WidthAlpha;Width  Alpha;8;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;419;-1856,1168;Inherit;False;Constant;_WidthAlpha;Width  Alpha;7;0;Create;True;0;0;0;False;0;False;4;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;304;-544,-1280;Inherit;False;hex_offset;-1;True;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;378;-1792,720;Inherit;False;Constant;_NoiseInfluence;Noise Influence;8;0;Create;True;0;0;0;False;0;False;1;0.24;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;377;-1504,480;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;382;-1744,-400;Inherit;False;304;hex_offset;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;376;-1744,-320;Inherit;False;Constant;_HexMaxOffset;Hex Max Offset;5;0;Create;True;0;0;0;False;0;False;-0.85;0.5;0;0;0;1;FLOAT;0
@@ -4471,9 +4356,9 @@ Node;AmplifyShaderEditor.TFHCRemapNode;397;-768,-1872;Inherit;False;5;0;FLOAT;0;
 Node;AmplifyShaderEditor.GetLocalVarNode;398;-784,-1680;Inherit;False;383;clip_1;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;406;-592,-1872;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.OneMinusNode;407;-592,-1680;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;282;-1872,1488;Inherit;False;Property;_WidthVertex;Width Vertex;6;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.CommentaryNode;386;784,160;Inherit;False;728.7793;273.783;Alpha;5;391;390;389;387;388;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;399;-384,-1808;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;282;-1872,1488;Inherit;False;Constant;_WidthVertex;Width Vertex;6;0;Create;True;0;0;0;False;0;False;4;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;281;-1648,1312;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;391;800,304;Inherit;False;383;clip_1;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;409;-80,-1808;Inherit;False;total_hex;-1;True;1;0;FLOAT;0;False;1;FLOAT;0
@@ -4481,19 +4366,19 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;283;-1344,1328;Inherit;True;2;2;0;
 Node;AmplifyShaderEditor.SignOpNode;390;976,304;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;389;896,208;Inherit;False;409;total_hex;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.OneMinusNode;284;-1088,1344;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;288;-1056,1488;Inherit;True;Property;_Contrast;Contrast;9;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;288;-1056,1488;Inherit;True;Property;_Contrast;Contrast;6;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;387;1104,208;Inherit;True;3;0;FLOAT;1;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;287;-816,1344;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;388;1344,208;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;478;1312,512;Inherit;True;Property;_holiiiiiiiiiii;holiiiiiiiiiii;16;0;Create;True;0;0;0;False;0;False;20;20;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;478;1296,464;Inherit;True;Property;_Alpha;Alpha;8;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;297;-576,1344;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.NormalVertexDataNode;295;-608,1184;Inherit;False;0;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.CommentaryNode;427;-1312,-240;Inherit;False;862.4937;375.3285;Clip 2 Distance Offset;6;434;433;432;431;430;429;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;436;-1376,-3568;Inherit;False;1188;522.8;Fresnel;7;445;443;441;440;439;438;464;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;437;-1376,-2992;Inherit;False;1604;914.75;Emision;20;462;461;460;459;458;457;456;455;454;453;452;451;450;449;448;447;446;444;442;465;;1,1,1,1;0;0
-Node;AmplifyShaderEditor.CommentaryNode;472;1677.43,-2105.018;Inherit;False;882.78;370.8757;Normal;3;476;475;474;;1,1,1,1;0;0
+Node;AmplifyShaderEditor.CommentaryNode;472;-1424,-1024;Inherit;False;882.78;370.8757;Normal;4;476;475;474;422;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.SimpleContrastOpNode;308;1552,208;Inherit;True;2;1;COLOR;0,0,0,0;False;0;FLOAT;0.1;False;1;COLOR;0
-Node;AmplifyShaderEditor.SamplerNode;424;1856,-384;Inherit;True;Property;_MainTex;MainTex;2;0;Create;True;0;0;0;False;0;False;424;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.SamplerNode;424;1856,-368;Inherit;True;Property;_MainTex;MainTex;2;0;Create;True;0;0;0;False;0;False;424;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;296;-384,1328;Inherit;True;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.SimpleAddOpNode;429;-1200,-176;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;430;-1248,16;Inherit;False;Constant;_Distance2Max;Distance 2 Max;16;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
@@ -4501,14 +4386,14 @@ Node;AmplifyShaderEditor.SmoothstepOpNode;431;-1024,-144;Inherit;False;3;0;FLOAT
 Node;AmplifyShaderEditor.SaturateNode;432;-832,-144;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;438;-592,-3520;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.FresnelNode;439;-848,-3504;Inherit;False;Standard;WorldNormal;ViewDir;False;False;5;0;FLOAT3;0,0,1;False;4;FLOAT3;0,0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;5;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;440;-1040,-3504;Inherit;False;Property;_FresnelScale;Fresnel Scale;17;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;441;-1040,-3424;Inherit;False;Property;_FresnelPower;Fresnel Power;19;0;Create;True;0;0;0;False;0;False;5;0.16;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;440;-1040,-3504;Inherit;False;Constant;_FresnelScale;Fresnel Scale;9;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;441;-1040,-3424;Inherit;False;Constant;_FresnelPower;Fresnel Power;11;0;Create;True;0;0;0;False;0;False;1;0.16;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;443;-432,-3520;Inherit;False;fresnel;-1;True;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.HSVToRGBNode;445;-848,-3232;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;1;False;2;FLOAT;1;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;446;-576,-2928;Inherit;False;3;3;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;446;-576,-2928;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.GetLocalVarNode;448;-832,-2800;Inherit;False;383;clip_1;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleAddOpNode;449;-336,-2848;Inherit;False;3;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;450;-560,-2688;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;450;-560,-2688;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.GetLocalVarNode;451;-832,-2688;Inherit;False;433;clip_2;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ClampOpNode;452;-112,-2848;Inherit;False;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;1,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.OneMinusNode;457;-768,-2176;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
@@ -4519,34 +4404,35 @@ Node;AmplifyShaderEditor.TFHCRemapNode;460;-976,-2352;Inherit;False;5;0;FLOAT;0;
 Node;AmplifyShaderEditor.GetLocalVarNode;462;-960,-2176;Inherit;False;433;clip_2;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;434;-1248,-64;Inherit;False;Constant;_Distance2Min;Distance 2 Min;15;0;Create;True;0;0;0;False;0;False;-1;-1;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RGBToHSVNode;442;-1104,-2944;Inherit;False;1;0;FLOAT3;0,0,0;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.HSVToRGBNode;447;-848,-2944;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 Node;AmplifyShaderEditor.HSVToRGBNode;465;-864,-2592;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;10;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.RangedFloatNode;470;2113.763,560.061;Inherit;False;Property;_Smoothness;Smoothness;22;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;471;2144,624;Inherit;False;Property;_AO;AO;23;0;Create;True;0;0;0;False;0;False;0.1;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;469;2145.763,496.061;Inherit;False;Property;_Metal;Metal;21;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;474;1757.43,-2025.018;Inherit;False;Property;_NormalIntensity;Normal Intensity;5;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;475;2077.43,-2009.018;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT3;0,0,0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.RegisterLocalVarNode;476;2253.43,-2009.018;Inherit;False;Normal;-1;True;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.SamplerNode;422;1728,-1936;Inherit;True;Property;_Normal;Normal;4;0;Create;True;0;0;0;False;0;False;422;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
-Node;AmplifyShaderEditor.GetLocalVarNode;477;1968,-160;Inherit;False;476;Normal;1;0;OBJECT;;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.RangedFloatNode;474;-1344,-944;Inherit;False;Property;_NormalIntensity;Normal Intensity;5;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;475;-1024,-928;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.Vector4Node;453;-368,-2416;Inherit;False;Constant;_Vector0;Vector 0;27;0;Create;True;0;0;0;False;0;False;999,999,999,999;0,0,0,0;0;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.OneMinusNode;456;-1184,-2352;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;455;-1360,-2352;Inherit;False;305;hex;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;433;-688,-144;Inherit;False;clip_2;-1;True;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;454;-576,-2544;Inherit;False;443;fresnel;1;0;OBJECT;;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;461;128,-2848;Inherit;False;final_emission;-1;True;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.GetLocalVarNode;463;1936,-80;Inherit;False;461;final_emission;1;0;OBJECT;;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.ColorNode;444;-1328,-2944;Inherit;False;Property;_HexColor;Hex Color;3;1;[HDR];Create;True;0;0;0;False;0;False;1.490777,6.498019,1.134088,0;5.111077,12.68957,33.66261,0;True;True;0;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
-Node;AmplifyShaderEditor.RangedFloatNode;490;2160,-496;Inherit;False;Constant;_Float1;Float 1;22;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.GetLocalVarNode;480;352,-544;Inherit;False;476;Normal;1;0;OBJECT;;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;479;1344,-512;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT3;0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleAddOpNode;489;1136,-512;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.FresnelNode;481;928,-432;Inherit;False;Standard;WorldNormal;ViewDir;False;False;5;0;FLOAT3;0,0,1;False;4;FLOAT3;0,0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;5;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;484;688,-432;Inherit;False;Property;_Bias;Bias;13;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;482;688,-304;Inherit;False;Property;_Power;Power;18;0;Create;True;0;0;0;False;0;False;2;20;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;483;688,-368;Inherit;False;Property;_Scale;Scale;15;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.GetLocalVarNode;488;912,-528;Inherit;False;461;final_emission;1;0;OBJECT;;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;487;1856,160;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;487;1808,192;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.ColorNode;444;-1328,-2944;Inherit;False;Property;_HexColor;Hex Color;3;1;[HDR];Create;True;0;0;0;False;0;False;1.490777,6.498019,1.134088,0;5.111077,12.68957,33.66261,0;True;True;0;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.SamplerNode;422;-1360,-848;Inherit;True;Property;_Normal;Normal;4;0;Create;True;0;0;0;False;0;False;422;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.RangedFloatNode;469;2144,256;Inherit;False;Constant;_Metal;Metal;22;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;470;2112,320;Inherit;False;Constant;_Smoothness;Smoothness;23;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;471;2144,384;Inherit;False;Constant;_AO;AO;24;0;Create;True;0;0;0;False;0;False;0.1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;490;2160,-496;Inherit;False;Constant;_Float1;Float 1;22;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;484;688,-432;Inherit;False;Constant;_Bias;Bias;13;0;Create;True;0;0;0;False;0;False;0;20;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;483;688,-368;Inherit;False;Constant;_Scale;Scale;15;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;482;688,-304;Inherit;False;Constant;_Power;Power;17;0;Create;True;0;0;0;False;0;False;2;20;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.HSVToRGBNode;447;-848,-2944;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;479;1328,-528;Inherit;False;4;4;0;COLOR;0,0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.GetLocalVarNode;488;928,-512;Inherit;False;461;final_emission;1;0;OBJECT;;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.RegisterLocalVarNode;476;-848,-928;Inherit;False;Normal;-1;True;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.GetLocalVarNode;477;1968,-160;Inherit;False;476;Normal;1;0;OBJECT;;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SamplerNode;491;864,-256;Inherit;True;Property;_NoiseDots;NoiseDots;9;0;Create;True;0;0;0;False;0;False;491;434eefdca1728cb4083fcf3960b54e1b;434eefdca1728cb4083fcf3960b54e1b;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.FunctionNode;493;960,-64;Inherit;False;Saturation;-1;;1;4f383aa3b2a7ef640be83276d286e709;1,51,0;2;12;FLOAT3;0,0,0;False;21;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.GetLocalVarNode;492;736,-64;Inherit;False;476;Normal;1;0;OBJECT;;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;254;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;255;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;True;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;256;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;;0;0;Standard;0;False;0
@@ -4557,7 +4443,7 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;260;2350.026,41.43348;Float
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;261;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;262;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;MotionVectors;0;10;MotionVectors;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;False;False;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=MotionVectors;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;253;2352,208;Half;False;True;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;HexAvatarAstro;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;21;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;UniversalMaterialType=Lit;True;5;True;6;d3d11;glcore;gles;gles3;metal;vulkan;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;45;Lighting Model;0;0;Workflow;1;0;Surface;1;638840211442894263;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Alpha Clipping;0;638840211623091684;  Use Shadow Threshold;0;0;Fragment Normal Space,InvertActionOnDeselection;0;638760956768372331;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;0;638760114829022127;Receive Shadows;0;638760114843624751;Receive SSAO;0;638760943693940926;Motion Vectors;0;638760943709203541;  Add Precomputed Velocity;0;0;GPU Instancing;0;638840210320310712;LOD CrossFade;0;638840210332349428;Built-in Fog;0;638840210509685182;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;1;638840210379177527;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;11;True;True;False;True;True;True;True;True;True;True;False;False;;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;252;2368,-400;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;True;True;2;5;False;;10;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;252;2320,-528;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;True;True;2;5;False;;10;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
 WireConnection;385;0;369;0
 WireConnection;410;0;411;0
 WireConnection;410;1;385;0
@@ -4565,7 +4451,8 @@ WireConnection;380;0;410;0
 WireConnection;302;9;299;0
 WireConnection;302;3;300;0
 WireConnection;302;4;301;0
-WireConnection;420;0;289;0
+WireConnection;494;0;289;0
+WireConnection;420;0;494;0
 WireConnection;420;1;421;0
 WireConnection;467;0;468;0
 WireConnection;467;2;380;0
@@ -4631,22 +4518,22 @@ WireConnection;431;0;429;0
 WireConnection;431;1;434;0
 WireConnection;431;2;430;0
 WireConnection;432;0;431;0
-WireConnection;438;0;439;0
+WireConnection;438;0;464;0
 WireConnection;438;1;445;0
-WireConnection;438;2;464;0
+WireConnection;438;2;439;0
 WireConnection;439;2;440;0
 WireConnection;439;3;441;0
 WireConnection;443;0;438;0
 WireConnection;445;0;442;1
-WireConnection;446;0;447;0
+WireConnection;446;0;459;0
 WireConnection;446;1;448;0
-WireConnection;446;2;459;0
+WireConnection;446;2;447;0
 WireConnection;449;0;446;0
 WireConnection;449;1;450;0
 WireConnection;449;2;454;0
 WireConnection;450;0;451;0
-WireConnection;450;1;465;0
-WireConnection;450;2;459;0
+WireConnection;450;1;459;0
+WireConnection;450;2;465;0
 WireConnection;452;0;449;0
 WireConnection;452;2;453;0
 WireConnection;457;0;462;0
@@ -4655,19 +4542,13 @@ WireConnection;459;0;458;0
 WireConnection;459;1;457;0
 WireConnection;460;0;456;0
 WireConnection;442;0;444;0
-WireConnection;447;0;442;1
-WireConnection;447;1;442;2
-WireConnection;447;2;442;3
 WireConnection;465;0;442;1
 WireConnection;465;1;442;2
 WireConnection;475;0;474;0
 WireConnection;475;1;422;0
-WireConnection;476;0;475;0
 WireConnection;456;0;455;0
 WireConnection;433;0;432;0
 WireConnection;461;0;452;0
-WireConnection;479;0;444;0
-WireConnection;479;1;489;0
 WireConnection;489;0;488;0
 WireConnection;489;1;481;0
 WireConnection;481;1;484;0
@@ -4675,6 +4556,15 @@ WireConnection;481;2;483;0
 WireConnection;481;3;482;0
 WireConnection;487;0;424;0
 WireConnection;487;1;308;0
+WireConnection;447;0;442;1
+WireConnection;447;1;442;2
+WireConnection;447;2;442;3
+WireConnection;479;0;444;0
+WireConnection;479;1;489;0
+WireConnection;479;2;491;5
+WireConnection;479;3;493;0
+WireConnection;476;0;475;0
+WireConnection;493;12;492;0
 WireConnection;253;0;424;0
 WireConnection;253;1;477;0
 WireConnection;253;2;479;0
@@ -4685,4 +4575,4 @@ WireConnection;253;6;487;0
 WireConnection;253;8;296;0
 WireConnection;252;1;490;0
 ASEEND*/
-//CHKSM=6DDA66996FF5888DBB7FBD4AC7063AEDBBC3DE14
+//CHKSM=644A49033667E169723CF75D7D10155E76143F3F
