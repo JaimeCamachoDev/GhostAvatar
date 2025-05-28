@@ -22,6 +22,7 @@ Shader "HexAvatarAstro"
 		_Bias("Bias", Float) = 1
 		_NoiseScale("Noise Scale", Float) = 2
 		_Scale("Scale", Float) = 1
+		_holiiiiiiiiiii("holiiiiiiiiiii", Float) = 20
 		_FresnelScale("Fresnel Scale", Float) = 1
 		_Power("Power", Float) = 2
 		_FresnelPower("Fresnel Power", Float) = 5
@@ -262,6 +263,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -269,17 +271,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -639,6 +641,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -646,17 +649,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -979,6 +982,7 @@ Shader "HexAvatarAstro"
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
 				float2 uv_MainTex = input.ase_texcoord9.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				
 				float2 uv_Normal = input.ase_texcoord9.xy * _Normal_ST.xy + _Normal_ST.zw;
 				half3 Normal476 = ( _NormalIntensity * UnpackNormalScale( tex2D( _Normal, uv_Normal ), 1.0f ) );
@@ -1027,14 +1031,14 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_6 = (saturate( lerpResult387 )).xxxx;
 				
 
-				float3 BaseColor = tex2D( _MainTex, uv_MainTex ).rgb;
+				float3 BaseColor = tex2DNode424.rgb;
 				float3 Normal = Normal476;
 				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
 				float Smoothness = _Smoothness;
 				float Occlusion = _AO;
-				float Alpha = CalculateContrast(0.1,temp_cast_6).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_6) ).r;
 				float AlphaClipThreshold = 0.5;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
@@ -1346,7 +1350,7 @@ Shader "HexAvatarAstro"
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
-				
+				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -1360,8 +1364,9 @@ Shader "HexAvatarAstro"
 				#endif
 				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_texcoord4 : TEXCOORD4;
-				float3 ase_normal : NORMAL;
 				float4 ase_texcoord5 : TEXCOORD5;
+				float3 ase_normal : NORMAL;
+				float4 ase_texcoord6 : TEXCOORD6;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -1371,6 +1376,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -1378,17 +1384,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1419,6 +1425,7 @@ Shader "HexAvatarAstro"
 				int _PassValue;
 			#endif
 
+			sampler2D _MainTex;
 			sampler2D _HexPattern;
 
 
@@ -1490,15 +1497,17 @@ Shader "HexAvatarAstro"
 				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
 				
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
-				output.ase_texcoord3.xyz = ase_normalWS;
-				output.ase_texcoord5.xyz = vertexToFrag385;
+				output.ase_texcoord4.xyz = ase_normalWS;
+				output.ase_texcoord6.xyz = vertexToFrag385;
 				
-				output.ase_texcoord4 = input.positionOS;
+				output.ase_texcoord3.xy = input.ase_texcoord.xy;
+				output.ase_texcoord5 = input.positionOS;
 				output.ase_normal = input.normalOS;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord3.w = 0;
-				output.ase_texcoord5.w = 0;
+				output.ase_texcoord3.zw = 0;
+				output.ase_texcoord4.w = 0;
+				output.ase_texcoord6.w = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
@@ -1533,7 +1542,8 @@ Shader "HexAvatarAstro"
 			{
 				float4 positionOS : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
-				
+				float4 ase_texcoord : TEXCOORD0;
+
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -1550,7 +1560,7 @@ Shader "HexAvatarAstro"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				output.positionOS = input.positionOS;
 				output.normalOS = input.normalOS;
-				
+				output.ase_texcoord = input.ase_texcoord;
 				return output;
 			}
 
@@ -1589,7 +1599,7 @@ Shader "HexAvatarAstro"
 				Attributes output = (Attributes) 0;
 				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
 				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				
+				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
@@ -1629,14 +1639,16 @@ Shader "HexAvatarAstro"
 					#endif
 				#endif
 
+				float2 uv_MainTex = input.ase_texcoord3.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				half2 temp_cast_0 = (_Tiling).xx;
-				half3 ase_normalWS = input.ase_texcoord3.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord4.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
+				half3 ase_normalWS = input.ase_texcoord4.xyz;
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord5.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
 				float3 ase_objectPosition = GetAbsolutePositionWS( UNITY_MATRIX_M._m03_m13_m23 );
-				half3 vertexToFrag385 = input.ase_texcoord5.xyz;
+				half3 vertexToFrag385 = input.ase_texcoord6.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
 				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
@@ -1659,7 +1671,7 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_1 = (saturate( lerpResult387 )).xxxx;
 				
 
-				float Alpha = CalculateContrast(0.1,temp_cast_1).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -1767,6 +1779,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -1774,17 +1787,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2065,6 +2078,7 @@ Shader "HexAvatarAstro"
 				#endif
 
 				float2 uv_MainTex = input.ase_texcoord4.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				
 				half3 hsvTorgb442 = RGBToHSV( _HexColor.rgb );
 				half3 hsvTorgb447 = HSVToRGB( half3(hsvTorgb442.x,hsvTorgb442.y,hsvTorgb442.z) );
@@ -2113,9 +2127,9 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_6 = (saturate( lerpResult387 )).xxxx;
 				
 
-				float3 BaseColor = tex2D( _MainTex, uv_MainTex ).rgb;
+				float3 BaseColor = tex2DNode424.rgb;
 				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) ).rgb;
-				float Alpha = CalculateContrast(0.1,temp_cast_6).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_6) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				#ifdef _ALPHATEST_ON
@@ -2215,6 +2229,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -2222,17 +2237,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2477,6 +2492,7 @@ Shader "HexAvatarAstro"
 				#endif
 
 				float2 uv_MainTex = input.ase_texcoord2.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				
 				half2 temp_cast_1 = (_Tiling).xx;
 				half3 ase_normalWS = input.ase_texcoord3.xyz;
@@ -2508,8 +2524,8 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_2 = (saturate( lerpResult387 )).xxxx;
 				
 
-				float3 BaseColor = tex2D( _MainTex, uv_MainTex ).rgb;
-				float Alpha = CalculateContrast(0.1,temp_cast_2).r;
+				float3 BaseColor = tex2DNode424.rgb;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_2) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				half4 color = half4(BaseColor, Alpha );
@@ -2619,6 +2635,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -2626,17 +2643,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2668,6 +2685,7 @@ Shader "HexAvatarAstro"
 			#endif
 
 			sampler2D _Normal;
+			sampler2D _MainTex;
 			sampler2D _HexPattern;
 
 
@@ -2895,6 +2913,8 @@ Shader "HexAvatarAstro"
 				float2 uv_Normal = input.ase_texcoord5.xy * _Normal_ST.xy + _Normal_ST.zw;
 				half3 Normal476 = ( _NormalIntensity * UnpackNormalScale( tex2D( _Normal, uv_Normal ), 1.0f ) );
 				
+				float2 uv_MainTex = input.ase_texcoord5.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				half2 temp_cast_0 = (_Tiling).xx;
 				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord6.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
@@ -2925,7 +2945,7 @@ Shader "HexAvatarAstro"
 				
 
 				float3 Normal = Normal476;
-				float Alpha = CalculateContrast(0.1,temp_cast_1).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
 				float AlphaClipThreshold = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -3108,6 +3128,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -3115,17 +3136,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3448,6 +3469,7 @@ Shader "HexAvatarAstro"
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
 				float2 uv_MainTex = input.ase_texcoord9.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				
 				float2 uv_Normal = input.ase_texcoord9.xy * _Normal_ST.xy + _Normal_ST.zw;
 				half3 Normal476 = ( _NormalIntensity * UnpackNormalScale( tex2D( _Normal, uv_Normal ), 1.0f ) );
@@ -3496,14 +3518,14 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_6 = (saturate( lerpResult387 )).xxxx;
 				
 
-				float3 BaseColor = tex2D( _MainTex, uv_MainTex ).rgb;
+				float3 BaseColor = tex2DNode424.rgb;
 				float3 Normal = Normal476;
 				float3 Emission = ( _HexColor * half4( ( final_emission461 + fresnelNode481 ) , 0.0 ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
 				float Smoothness = _Smoothness;
 				float Occlusion = _AO;
-				float Alpha = CalculateContrast(0.1,temp_cast_6).r;
+				float Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_6) ).r;
 				float AlphaClipThreshold = 0.5;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
@@ -3676,7 +3698,7 @@ Shader "HexAvatarAstro"
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
-				
+				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -3686,8 +3708,9 @@ Shader "HexAvatarAstro"
 				float4 ase_texcoord : TEXCOORD0;
 				float4 ase_texcoord1 : TEXCOORD1;
 				float4 ase_texcoord2 : TEXCOORD2;
-				float3 ase_normal : NORMAL;
 				float4 ase_texcoord3 : TEXCOORD3;
+				float3 ase_normal : NORMAL;
+				float4 ase_texcoord4 : TEXCOORD4;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -3697,6 +3720,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -3704,17 +3728,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3745,6 +3769,7 @@ Shader "HexAvatarAstro"
 				int _PassValue;
 			#endif
 
+			sampler2D _MainTex;
 			sampler2D _HexPattern;
 
 
@@ -3823,18 +3848,20 @@ Shader "HexAvatarAstro"
 				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
 				
-				output.ase_texcoord.xyz = ase_positionWS;
+				output.ase_texcoord1.xyz = ase_positionWS;
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
-				output.ase_texcoord1.xyz = ase_normalWS;
-				output.ase_texcoord3.xyz = vertexToFrag385;
+				output.ase_texcoord2.xyz = ase_normalWS;
+				output.ase_texcoord4.xyz = vertexToFrag385;
 				
-				output.ase_texcoord2 = input.positionOS;
+				output.ase_texcoord.xy = input.ase_texcoord.xy;
+				output.ase_texcoord3 = input.positionOS;
 				output.ase_normal = input.normalOS;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord.w = 0;
+				output.ase_texcoord.zw = 0;
 				output.ase_texcoord1.w = 0;
-				output.ase_texcoord3.w = 0;
+				output.ase_texcoord2.w = 0;
+				output.ase_texcoord4.w = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
@@ -3864,7 +3891,8 @@ Shader "HexAvatarAstro"
 			{
 				float4 positionOS : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
-				
+				float4 ase_texcoord : TEXCOORD0;
+
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -3881,7 +3909,7 @@ Shader "HexAvatarAstro"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				output.positionOS = input.positionOS;
 				output.normalOS = input.normalOS;
-				
+				output.ase_texcoord = input.ase_texcoord;
 				return output;
 			}
 
@@ -3920,7 +3948,7 @@ Shader "HexAvatarAstro"
 				Attributes output = (Attributes) 0;
 				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
 				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				
+				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
@@ -3942,15 +3970,17 @@ Shader "HexAvatarAstro"
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
+				float2 uv_MainTex = input.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				half2 temp_cast_0 = (_Tiling).xx;
-				float3 ase_positionWS = input.ase_texcoord.xyz;
-				half3 ase_normalWS = input.ase_texcoord1.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord2.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
+				float3 ase_positionWS = input.ase_texcoord1.xyz;
+				half3 ase_normalWS = input.ase_texcoord2.xyz;
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord3.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
 				float3 ase_objectPosition = GetAbsolutePositionWS( UNITY_MATRIX_M._m03_m13_m23 );
-				half3 vertexToFrag385 = input.ase_texcoord3.xyz;
+				half3 vertexToFrag385 = input.ase_texcoord4.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
 				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
@@ -3973,7 +4003,7 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_1 = (saturate( lerpResult387 )).xxxx;
 				
 
-				surfaceDescription.Alpha = CalculateContrast(0.1,temp_cast_1).r;
+				surfaceDescription.Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
 				surfaceDescription.AlphaClipThreshold = 0.5;
 
 				#if _ALPHATEST_ON
@@ -4051,7 +4081,7 @@ Shader "HexAvatarAstro"
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
-				
+				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -4061,8 +4091,9 @@ Shader "HexAvatarAstro"
 				float4 ase_texcoord : TEXCOORD0;
 				float4 ase_texcoord1 : TEXCOORD1;
 				float4 ase_texcoord2 : TEXCOORD2;
-				float3 ase_normal : NORMAL;
 				float4 ase_texcoord3 : TEXCOORD3;
+				float3 ase_normal : NORMAL;
+				float4 ase_texcoord4 : TEXCOORD4;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -4072,6 +4103,7 @@ Shader "HexAvatarAstro"
 			half4 _Normal_ST;
 			half4 _HexColor;
 			half _HorVert;
+			half _Smoothness;
 			half _Metal;
 			half _Power;
 			half _Scale;
@@ -4079,17 +4111,17 @@ Shader "HexAvatarAstro"
 			half _FresnelPower;
 			half _FresnelScale;
 			half _WidthAlpha;
-			half _NoiseInfluence1;
+			half _NoiseScale;
+			half _AO;
 			half _Falloff;
-			half _Smoothness;
 			half _Tiling;
 			half _NormalIntensity;
 			half _Contrast;
 			half _WidthVertex;
 			half _TransitionOffset;
 			half _Transition;
-			half _NoiseScale;
-			half _AO;
+			half _NoiseInfluence1;
+			half _holiiiiiiiiiii;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -4120,6 +4152,7 @@ Shader "HexAvatarAstro"
 				int _PassValue;
 			#endif
 
+			sampler2D _MainTex;
 			sampler2D _HexPattern;
 
 
@@ -4198,18 +4231,20 @@ Shader "HexAvatarAstro"
 				half temp_output_280_0 = ( ifLocalVar467 - ( _Transition + _TransitionOffset ) );
 				half temp_output_281_0 = ( temp_output_280_0 * _WidthVertex );
 				
-				output.ase_texcoord.xyz = ase_positionWS;
+				output.ase_texcoord1.xyz = ase_positionWS;
 				half3 ase_normalWS = TransformObjectToWorldNormal( input.normalOS );
-				output.ase_texcoord1.xyz = ase_normalWS;
-				output.ase_texcoord3.xyz = vertexToFrag385;
+				output.ase_texcoord2.xyz = ase_normalWS;
+				output.ase_texcoord4.xyz = vertexToFrag385;
 				
-				output.ase_texcoord2 = input.positionOS;
+				output.ase_texcoord.xy = input.ase_texcoord.xy;
+				output.ase_texcoord3 = input.positionOS;
 				output.ase_normal = input.normalOS;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord.w = 0;
+				output.ase_texcoord.zw = 0;
 				output.ase_texcoord1.w = 0;
-				output.ase_texcoord3.w = 0;
+				output.ase_texcoord2.w = 0;
+				output.ase_texcoord4.w = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
@@ -4238,7 +4273,8 @@ Shader "HexAvatarAstro"
 			{
 				float4 positionOS : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
-				
+				float4 ase_texcoord : TEXCOORD0;
+
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -4255,7 +4291,7 @@ Shader "HexAvatarAstro"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				output.positionOS = input.positionOS;
 				output.normalOS = input.normalOS;
-				
+				output.ase_texcoord = input.ase_texcoord;
 				return output;
 			}
 
@@ -4294,7 +4330,7 @@ Shader "HexAvatarAstro"
 				Attributes output = (Attributes) 0;
 				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
 				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				
+				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
@@ -4316,15 +4352,17 @@ Shader "HexAvatarAstro"
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
+				float2 uv_MainTex = input.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				half4 tex2DNode424 = tex2D( _MainTex, uv_MainTex );
 				half2 temp_cast_0 = (_Tiling).xx;
-				float3 ase_positionWS = input.ase_texcoord.xyz;
-				half3 ase_normalWS = input.ase_texcoord1.xyz;
-				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord2.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
+				float3 ase_positionWS = input.ase_texcoord1.xyz;
+				half3 ase_normalWS = input.ase_texcoord2.xyz;
+				float4 triplanar302 = TriplanarSampling302( _HexPattern, input.ase_texcoord3.xyz, input.ase_normal, _Falloff, temp_cast_0, 1.0, 0 );
 				half hex305 = triplanar302.x;
 				half hex_offset304 = (0.0 + (triplanar302.g - 0.0) * (-1.0 - 0.0) / (1.0 - 0.0));
 				half temp_output_370_0 = ( hex_offset304 * -0.85 );
 				float3 ase_objectPosition = GetAbsolutePositionWS( UNITY_MATRIX_M._m03_m13_m23 );
-				half3 vertexToFrag385 = input.ase_texcoord3.xyz;
+				half3 vertexToFrag385 = input.ase_texcoord4.xyz;
 				half3 break380 = ( ase_objectPosition - vertexToFrag385 );
 				half2 appendResult381 = (half2(break380.x , break380.z));
 				half simplePerlin2D384 = snoise( appendResult381*_NoiseScale );
@@ -4347,7 +4385,7 @@ Shader "HexAvatarAstro"
 				half4 temp_cast_1 = (saturate( lerpResult387 )).xxxx;
 				
 
-				surfaceDescription.Alpha = CalculateContrast(0.1,temp_cast_1).r;
+				surfaceDescription.Alpha = ( tex2DNode424 * CalculateContrast(_holiiiiiiiiiii,temp_cast_1) ).r;
 				surfaceDescription.AlphaClipThreshold = 0.5;
 
 				#if _ALPHATEST_ON
@@ -4420,8 +4458,8 @@ Node;AmplifyShaderEditor.RangedFloatNode;373;-1264,-432;Inherit;False;Constant;_
 Node;AmplifyShaderEditor.SimpleAddOpNode;372;-1216,-528;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SmoothstepOpNode;374;-1056,-512;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;371;-864,-512;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.CommentaryNode;396;-1392,-2048;Inherit;False;1556;514.95;Hex Small FX;12;409;407;406;405;401;399;398;397;400;402;403;404;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;383;-656,-512;Inherit;False;clip_1;-1;True;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.CommentaryNode;396;-1392,-2048;Inherit;False;1556;514.95;Hex Small FX;12;409;407;406;405;401;399;398;397;400;402;403;404;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.GetLocalVarNode;404;-1344,-1648;Inherit;False;383;clip_1;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.Vector4Node;402;-1312,-2000;Inherit;False;Constant;_LevelsEnd;Levels End;11;0;Create;True;0;0;0;False;0;False;0,1,0,1;0,1,0,1;0;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.Vector4Node;403;-1312,-1824;Inherit;False;Constant;_LevelsStart;Levels Start;8;0;Create;True;0;0;0;False;0;False;0.5,1,0,1;0.99,1,0,1;0;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
@@ -4431,28 +4469,31 @@ Node;AmplifyShaderEditor.BreakToComponentsNode;401;-928,-1840;Inherit;False;FLOA
 Node;AmplifyShaderEditor.GetLocalVarNode;400;-976,-1984;Inherit;False;305;hex;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.TFHCRemapNode;397;-768,-1872;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;1;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;398;-784,-1680;Inherit;False;383;clip_1;1;0;OBJECT;;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;282;-1872,1488;Inherit;False;Property;_WidthVertex;Width Vertex;6;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;406;-592,-1872;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.OneMinusNode;407;-592,-1680;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;281;-1648,1312;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;282;-1872,1488;Inherit;False;Property;_WidthVertex;Width Vertex;6;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.CommentaryNode;386;784,160;Inherit;False;728.7793;273.783;Alpha;5;391;390;389;387;388;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;399;-384,-1808;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;283;-1344,1328;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RegisterLocalVarNode;409;-80,-1808;Inherit;False;total_hex;-1;True;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;281;-1648,1312;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;391;800,304;Inherit;False;383;clip_1;1;0;OBJECT;;False;1;FLOAT;0
-Node;AmplifyShaderEditor.OneMinusNode;284;-1088,1344;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;288;-1056,1488;Inherit;True;Property;_Contrast;Contrast;9;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RegisterLocalVarNode;409;-80,-1808;Inherit;False;total_hex;-1;True;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;283;-1344,1328;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SignOpNode;390;976,304;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;389;896,208;Inherit;False;409;total_hex;1;0;OBJECT;;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;287;-816,1344;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.OneMinusNode;284;-1088,1344;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;288;-1056,1488;Inherit;True;Property;_Contrast;Contrast;9;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;387;1104,208;Inherit;True;3;0;FLOAT;1;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;287;-816,1344;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SaturateNode;388;1344,208;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;478;1312,512;Inherit;True;Property;_holiiiiiiiiiii;holiiiiiiiiiii;16;0;Create;True;0;0;0;False;0;False;20;20;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;297;-576,1344;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.NormalVertexDataNode;295;-608,1184;Inherit;False;0;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.CommentaryNode;427;-1312,-240;Inherit;False;862.4937;375.3285;Clip 2 Distance Offset;6;434;433;432;431;430;429;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;436;-1376,-3568;Inherit;False;1188;522.8;Fresnel;7;445;443;441;440;439;438;464;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;437;-1376,-2992;Inherit;False;1604;914.75;Emision;20;462;461;460;459;458;457;456;455;454;453;452;451;450;449;448;447;446;444;442;465;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;472;1677.43,-2105.018;Inherit;False;882.78;370.8757;Normal;3;476;475;474;;1,1,1,1;0;0
-Node;AmplifyShaderEditor.SaturateNode;388;1344,208;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleContrastOpNode;308;1552,208;Inherit;True;2;1;COLOR;0,0,0,0;False;0;FLOAT;0.1;False;1;COLOR;0
+Node;AmplifyShaderEditor.SamplerNode;424;1856,-384;Inherit;True;Property;_MainTex;MainTex;2;0;Create;True;0;0;0;False;0;False;424;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;296;-384,1328;Inherit;True;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.SimpleAddOpNode;429;-1200,-176;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;430;-1248,16;Inherit;False;Constant;_Distance2Max;Distance 2 Max;16;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
@@ -4480,37 +4521,32 @@ Node;AmplifyShaderEditor.RangedFloatNode;434;-1248,-64;Inherit;False;Constant;_D
 Node;AmplifyShaderEditor.RGBToHSVNode;442;-1104,-2944;Inherit;False;1;0;FLOAT3;0,0,0;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 Node;AmplifyShaderEditor.HSVToRGBNode;447;-848,-2944;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 Node;AmplifyShaderEditor.HSVToRGBNode;465;-864,-2592;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;10;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.RangedFloatNode;470;2113.763,560.061;Inherit;False;Property;_Smoothness;Smoothness;23;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;471;2144,624;Inherit;False;Property;_AO;AO;25;0;Create;True;0;0;0;False;0;False;0.1;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;469;2145.763,496.061;Inherit;False;Property;_Metal;Metal;22;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;470;2113.763,560.061;Inherit;False;Property;_Smoothness;Smoothness;22;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;471;2144,624;Inherit;False;Property;_AO;AO;23;0;Create;True;0;0;0;False;0;False;0.1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;469;2145.763,496.061;Inherit;False;Property;_Metal;Metal;21;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;474;1757.43,-2025.018;Inherit;False;Property;_NormalIntensity;Normal Intensity;5;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;475;2077.43,-2009.018;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;476;2253.43,-2009.018;Inherit;False;Normal;-1;True;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.SamplerNode;422;1728,-1936;Inherit;True;Property;_Normal;Normal;4;0;Create;True;0;0;0;False;0;False;422;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
 Node;AmplifyShaderEditor.GetLocalVarNode;477;1968,-160;Inherit;False;476;Normal;1;0;OBJECT;;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.SamplerNode;424;1872,-368;Inherit;True;Property;_MainTex;MainTex;2;0;Create;True;0;0;0;False;0;False;424;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
 Node;AmplifyShaderEditor.Vector4Node;453;-368,-2416;Inherit;False;Constant;_Vector0;Vector 0;27;0;Create;True;0;0;0;False;0;False;999,999,999,999;0,0,0,0;0;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.OneMinusNode;456;-1184,-2352;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;455;-1360,-2352;Inherit;False;305;hex;1;0;OBJECT;;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;433;-688,-144;Inherit;False;clip_2;-1;True;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.GetLocalVarNode;454;-576,-2544;Inherit;False;443;fresnel;1;0;OBJECT;;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.FresnelNode;481;1088,-544;Inherit;False;Standard;WorldNormal;ViewDir;False;False;5;0;FLOAT3;0,0,1;False;4;FLOAT3;0,0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;5;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;485;768,-336;Inherit;True;Property;_AvatarGhost_MainText;Avatar Ghost_MainText;21;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
-Node;AmplifyShaderEditor.RangedFloatNode;486;896,-144;Inherit;False;Property;_Contrast1;Contrast;24;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;484;848,-544;Inherit;False;Property;_Bias;Bias;13;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;482;848,-416;Inherit;False;Property;_Power;Power;18;0;Create;True;0;0;0;False;0;False;2;20;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;483;848,-480;Inherit;False;Property;_Scale;Scale;15;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;478;768,-784;Inherit;True;Property;_holiiiiiiiiiii;holiiiiiiiiiii;16;0;Create;True;0;0;0;False;0;False;20;20;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;461;128,-2848;Inherit;False;final_emission;-1;True;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.GetLocalVarNode;463;1936,-80;Inherit;False;461;final_emission;1;0;OBJECT;;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.GetLocalVarNode;480;1120,-624;Inherit;False;476;Normal;1;0;OBJECT;;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.GetLocalVarNode;488;1120,0;Inherit;False;461;final_emission;1;0;OBJECT;;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.ColorNode;444;-1328,-2944;Inherit;False;Property;_HexColor;Hex Color;3;1;[HDR];Create;True;0;0;0;False;0;False;1.490777,6.498019,1.134088,0;5.111077,12.68957,33.66261,0;True;True;0;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;479;1712,0;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT3;0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleAddOpNode;489;1504,0;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;487;1104,-256;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.SimpleContrastOpNode;308;1552,208;Inherit;True;2;1;COLOR;0,0,0,0;False;0;FLOAT;0.1;False;1;COLOR;0
 Node;AmplifyShaderEditor.RangedFloatNode;490;2160,-496;Inherit;False;Constant;_Float1;Float 1;22;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.GetLocalVarNode;480;352,-544;Inherit;False;476;Normal;1;0;OBJECT;;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;479;1344,-512;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT3;0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleAddOpNode;489;1136,-512;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.FresnelNode;481;928,-432;Inherit;False;Standard;WorldNormal;ViewDir;False;False;5;0;FLOAT3;0,0,1;False;4;FLOAT3;0,0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;5;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;484;688,-432;Inherit;False;Property;_Bias;Bias;13;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;482;688,-304;Inherit;False;Property;_Power;Power;18;0;Create;True;0;0;0;False;0;False;2;20;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;483;688,-368;Inherit;False;Property;_Scale;Scale;15;0;Create;True;0;0;0;False;0;False;1;20;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.GetLocalVarNode;488;912,-528;Inherit;False;461;final_emission;1;0;OBJECT;;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;487;1856,160;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;254;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;255;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;True;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;256;2350.026,41.43348;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;;0;0;Standard;0;False;0
@@ -4570,21 +4606,23 @@ WireConnection;397;3;401;2
 WireConnection;397;4;401;3
 WireConnection;406;0;397;0
 WireConnection;407;0;398;0
-WireConnection;281;0;280;0
-WireConnection;281;1;282;0
 WireConnection;399;0;406;0
 WireConnection;399;1;407;0
+WireConnection;281;0;280;0
+WireConnection;281;1;282;0
+WireConnection;409;0;399;0
 WireConnection;283;0;281;0
 WireConnection;283;1;281;0
-WireConnection;409;0;399;0
-WireConnection;284;0;283;0
 WireConnection;390;0;391;0
-WireConnection;287;0;284;0
-WireConnection;287;1;288;0
+WireConnection;284;0;283;0
 WireConnection;387;1;389;0
 WireConnection;387;2;390;0
-WireConnection;297;0;287;0
+WireConnection;287;0;284;0
+WireConnection;287;1;288;0
 WireConnection;388;0;387;0
+WireConnection;297;0;287;0
+WireConnection;308;1;388;0
+WireConnection;308;0;478;0
 WireConnection;296;0;295;0
 WireConnection;296;1;297;0
 WireConnection;429;0;379;0
@@ -4627,25 +4665,24 @@ WireConnection;475;1;422;0
 WireConnection;476;0;475;0
 WireConnection;456;0;455;0
 WireConnection;433;0;432;0
-WireConnection;481;1;484;0
-WireConnection;481;2;483;0
-WireConnection;481;3;482;0
 WireConnection;461;0;452;0
 WireConnection;479;0;444;0
 WireConnection;479;1;489;0
 WireConnection;489;0;488;0
 WireConnection;489;1;481;0
-WireConnection;487;0;485;5
-WireConnection;487;1;486;0
-WireConnection;308;1;388;0
+WireConnection;481;1;484;0
+WireConnection;481;2;483;0
+WireConnection;481;3;482;0
+WireConnection;487;0;424;0
+WireConnection;487;1;308;0
 WireConnection;253;0;424;0
 WireConnection;253;1;477;0
 WireConnection;253;2;479;0
 WireConnection;253;3;469;0
 WireConnection;253;4;470;0
 WireConnection;253;5;471;0
-WireConnection;253;6;308;0
+WireConnection;253;6;487;0
 WireConnection;253;8;296;0
 WireConnection;252;1;490;0
 ASEEND*/
-//CHKSM=9E155A082C65900C8E424493C49D61D859270C99
+//CHKSM=6DDA66996FF5888DBB7FBD4AC7063AEDBBC3DE14
