@@ -178,7 +178,7 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _Tiling: 3
-    - _Transition: 0.379
+    - _Transition: 1
     - _TransitionOffset: 0
     - _VertexContrast: 0.05
     - _WidthAlpha: -4
