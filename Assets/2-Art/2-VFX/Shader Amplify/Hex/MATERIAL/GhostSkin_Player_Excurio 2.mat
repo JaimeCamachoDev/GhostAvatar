@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GhostSkin_Player_Excurio
-  m_Shader: {fileID: 4800000, guid: d6deddc68f1aafe408c285e91b8def23, type: 3}
+  m_Name: GhostSkin_Player_Excurio 2
+  m_Shader: {fileID: 4800000, guid: 439a02f44f52bca409bc1d3fb99c442d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -31,10 +31,10 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3001
+  m_CustomRenderQueue: 2451
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: _Metal _Power
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -68,6 +68,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _HexPattern:
         m_Texture: {fileID: 2800000, guid: 398400aea238e8e4cb643904700ecff7, type: 3}
+        m_Scale: {x: -2.78, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MAS:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -131,7 +135,7 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _Contrast: 100
+    - _Contrast: 0.1
     - _Contrast1: 0
     - _ContrastDots: 4.5
     - _Cull: 2
@@ -141,6 +145,7 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
+    - _Falloff: 4
     - _Float0: 10
     - _Float2: 20
     - _Float3: 1
@@ -172,7 +177,7 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _Tiling: 3
-    - _Transition: -0.33
+    - _Transition: -0.34
     - _TransitionOffset: 0
     - _VertexContrast: 0.05
     - _WidthAlpha: -2
@@ -181,7 +186,7 @@ Material:
     - _ZWrite: 1
     - _hjnoli: 0.8
     - _holiii: 3
-    - _holiiiiiiiiiii: 0.2
+    - _holiiiiiiiiiii: -0.91
     m_Colors:
     - _BaseColor: {r: 0.7169812, g: 0.38216448, b: 0.38216448, a: 1}
     - _Color: {r: 2.1906552, g: 4.063295, b: 6.3396235, a: 0.12941177}
